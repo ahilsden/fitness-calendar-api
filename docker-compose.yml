@@ -27,6 +27,22 @@ services:
         networks:
             - app-network
         restart: unless-stopped
+    db:
+        container_name: mysql_app
+        image: mysql:latest
+        ports:
+            - "3306:3306"
+        env_file:
+            - .env
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+        volumes:
+            - ./db-data:/var/lib/mysql
+        networks:
+            - app-network
+        restart: unless-stopped
 
 networks:
     app-network:
