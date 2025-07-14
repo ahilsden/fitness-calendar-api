@@ -8,7 +8,6 @@ use GuzzleHttp\Client;
 
 class StravaServiceProvider extends ServiceProvider
 {
-
     public function register(): void
     {
         $this->app->singleton('Strava', function () {

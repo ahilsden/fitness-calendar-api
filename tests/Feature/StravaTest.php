@@ -11,5 +11,7 @@ class StravaTest extends TestCase
     public function redirect_to_strava_returns_with_a_redirect_response()
     {
         $response = $this->getJson(route('web.strava.redirectToStrava'));
+
+        $response->assertStatus(302);
     }
 }
