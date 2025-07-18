@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Http;
 
 class Strava
 {
@@ -35,5 +36,19 @@ class Strava
         ]);
 
         return redirect("{$this->stravaOauthUri}/authorize?{$query}");
+    }
+
+    public function downloadActivities(string $authCode): array
+    {
+        $url = "{$this->stravaOauthUri}/token";
+        $config = [
+            'client_id' => $this->stravaClientId,
+            'client_secret' => $this->stravaSecretId,
+            'code' => $authCode,
+            'grant_type' => 'authorization_code'
+        ];
+        $response = Http::post($url, $config);
+
+        return json_decode($response->getBody(), true);
     }
 }

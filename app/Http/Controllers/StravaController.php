@@ -14,6 +14,11 @@ class StravaController extends Controller
 
     public function handleCallback(request $request)
     {
-        return "Callback function...";
+        if (!$request->has("code")) {
+            // todo: redirect back to relevant SPA page
+            return redirect('/')->withErrors('Auth failed');
+        }
+
+        return Strava::downloadActivities($request->code);
     }
 }
