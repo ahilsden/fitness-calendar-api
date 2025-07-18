@@ -40,6 +40,16 @@ class Strava
 
     public function downloadActivities(string $authCode): array
     {
+        $tokenData = $this->getAthleteWithTokens($authCode);
+        $activities = $this->getActivities($tokenData["access_token"]);
+
+        return $activities;
+
+        // todo: Save the activities
+    }
+
+    private function getAthleteWithTokens(string $authCode): array
+    {
         $url = "{$this->stravaOauthUri}/token";
         $config = [
             'client_id' => $this->stravaClientId,
@@ -50,5 +60,13 @@ class Strava
         $response = Http::post($url, $config);
 
         return json_decode($response->getBody(), true);
+    }
+
+    private function getActivities(string $token): array
+    {
+        $url = "{$this->stravaUri}/athlete/activities";
+        $response = Http::withToken($token)->get($url);
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 }
