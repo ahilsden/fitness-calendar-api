@@ -2,41 +2,38 @@
 
 namespace App\Services;
 
-use GuzzleHttp\ClientInterface;
 use Illuminate\Http\RedirectResponse;
 
 class Strava
 {
-    private $strava_uri = 'https://www.strava.com/api/v3';
-    private $strava_oauth_uri = 'https://www.strava.com/oauth';
-    private $client;
-    private $client_id;
-    private $client_secret;
-    private $redirect_uri;
+    private $stravaOauthUri = "https://www.strava.com/oauth";
+    private $stravaUri = 'https://www.strava.com/api/v3';
+
+    private $stravaClientId;
+    private $stravaSecretId;
+    private $stravaRedirectUri;
 
     public function __construct(
-        ClientInterface $client,
-        string $client_id,
-        string $client_secret,
-        string $redirect_uri
+        string $stravaClientId,
+        string $stravaSecretId,
+        string $stravaRedirectUri
     ) {
-        $this->client = $client;
-        $this->client_id = $client_id;
-        $this->client_secret = $client_secret;
-        $this->redirect_uri = $redirect_uri;
+        $this->stravaClientId = $stravaClientId;
+        $this->stravaSecretId = $stravaSecretId;
+        $this->stravaRedirectUri = $stravaRedirectUri;
     }
 
     public function getAuthCode(
         string $scope = "read_all,profile:read_all,activity:read_all"
     ): RedirectResponse {
         $query = http_build_query([
-            'client_id' => $this->client_id,
+            'client_id' => $this->stravaClientId,
             'response_type' => 'code',
-            'redirect_uri' => $this->redirect_uri,
+            'redirect_uri' => $this->stravaRedirectUri,
             'scope' => $scope,
             'state' => 'strava',
         ]);
 
-        return redirect("{$this->strava_oauth_uri}/authorize?{$query}");
+        return redirect("{$this->stravaOauthUri}/authorize?{$query}");
     }
 }

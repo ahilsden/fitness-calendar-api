@@ -11,3 +11,8 @@ Route::get(
     '/strava/auth',
     [StravaController::class, 'redirectToStrava']
 )->name('web.strava.redirectToStrava');
+
+Route::get(
+    '/strava/auth/handleCallback',
+    [StravaController::class, 'handleCallback']
+)->name('web.strava.handleCallback');
