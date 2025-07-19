@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\StravaActivity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -45,8 +46,11 @@ class Strava
             $tokenData = $this->getAthleteWithTokens($authCode);
             $activities = $this->getActivities($tokenData["access_token"]);
         } else {
-            $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
+            $activities = File::json(base_path('database/hardcodedData/reducedStravaActivity.json'));
         }
+
+        // Temp code
+        StravaActivity::create($activities);
 
         return $activities;
     }

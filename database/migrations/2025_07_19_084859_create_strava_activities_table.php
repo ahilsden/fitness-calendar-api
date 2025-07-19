@@ -13,18 +13,18 @@ return new class extends Migration
     {
         Schema::create('strava_activities', function (Blueprint $table) {
             $table->id();
-            $table->integer('strava_id');
-            $table->date('start_date');
+            $table->bigInteger('strava_id')->unique();
+            $table->string('start_date');
             $table->string('name', 100);
             $table->string('type', 20);
-            $table->integer('distance');
+            $table->decimal('distance');
             $table->integer('average_heartrate');
             $table->integer('max_heartrate');
             $table->integer('moving_time');
             $table->integer('elapsed_time');
             $table->text('map_polyline');
-            $table->json('start_position');
-            $table->json('end_position');
+            $table->json('start_latlng');
+            $table->json('end_latlng');
             $table->timestamps();
         });
     }
