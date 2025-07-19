@@ -45,12 +45,10 @@ class Strava
             $tokenData = $this->getAthleteWithTokens($authCode);
             $activities = $this->getActivities($tokenData["access_token"]);
         } else {
-            $activities = File::json(base_path('database/hardcodedData/stravaActivity.json'));
+            $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
         }
 
         return $activities;
-
-        // todo: Save the activities
     }
 
     private function getAthleteWithTokens(string $authCode): array
