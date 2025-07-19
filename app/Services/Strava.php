@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 
 class Strava
@@ -40,8 +41,12 @@ class Strava
 
     public function downloadActivities(string $authCode): array
     {
-        $tokenData = $this->getAthleteWithTokens($authCode);
-        $activities = $this->getActivities($tokenData["access_token"]);
+        if (env("DATA_MODE") !== "hardcoded") {
+            $tokenData = $this->getAthleteWithTokens($authCode);
+            $activities = $this->getActivities($tokenData["access_token"]);
+        } else {
+            $activities = File::json(base_path('database/hardcodedData/stravaActivity.json'));
+        }
 
         return $activities;
 
