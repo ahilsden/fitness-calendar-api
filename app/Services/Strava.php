@@ -51,7 +51,10 @@ class Strava
 
         // Temp code
         foreach ($activities as $activity) {
-            StravaActivity::create($activity);
+            StravaActivity::firstOrCreate(
+                ["strava_id" => $activity["strava_id"]],
+                $activity
+            );
         }
 
         return $activities;
