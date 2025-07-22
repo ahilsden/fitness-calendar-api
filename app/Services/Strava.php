@@ -6,6 +6,7 @@ use App\Models\StravaActivity;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 
 class Strava
 {
@@ -46,18 +47,12 @@ class Strava
             $tokenData = $this->getAthleteWithTokens($authCode);
             $activities = $this->getActivities($tokenData["access_token"]);
         } else {
-            $activities = File::json(base_path('database/hardcodedData/reducedStravaActivities.json'));
+            $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
         }
+        $mappedActivities = $this->mapActivities($activities);
+        $recentActivities = $this->storeActivities($mappedActivities);
 
-        // Temp code
-        foreach ($activities as $activity) {
-            StravaActivity::firstOrCreate(
-                ["strava_id" => $activity["strava_id"]],
-                $activity
-            );
-        }
-
-        return $activities;
+        return $recentActivities;
     }
 
     private function getAthleteWithTokens(string $authCode): array
@@ -80,5 +75,40 @@ class Strava
         $response = Http::withToken($token)->get($url);
 
         return json_decode($response->getBody()->getContents(), true);
+    }
+
+    // todo: Once refactored, add code with explanation to readme file
+    private function mapActivities(array $activities): array
+    {
+        $dataStatisticsToBeMapped = Schema::getColumnListing('strava_activities');
+
+        return array_map(function ($activity) use ($dataStatisticsToBeMapped) {
+            $activity["strava_id"] = $activity["id"];
+            $activity["map_polyline"] = $activity["map"]["summary_polyline"];
+            unset($activity["id"]);
+            unset($activity["map"]);
+
+            return array_filter($activity, function ($statItem) use ($dataStatisticsToBeMapped) {
+                return (in_array($statItem, $dataStatisticsToBeMapped));
+            }, ARRAY_FILTER_USE_KEY);
+        }, $activities);
+    }
+
+    private function storeActivities(array $mappedActivities): array
+    {
+        $recentActivities = [];
+
+        foreach ($mappedActivities as $mappedActivity) {
+            $newActivity = StravaActivity::firstOrCreate(
+                ["strava_id" => $mappedActivity["strava_id"]],
+                $mappedActivity
+            );
+
+            if ($newActivity->wasRecentlyCreated) {
+                array_push($recentActivities, $mappedActivity);
+            }
+        }
+
+        return $recentActivities;
     }
 }
