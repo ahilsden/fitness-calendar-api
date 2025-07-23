@@ -3,9 +3,12 @@
 namespace App\Services;
 
 use App\Models\StravaActivity;
+use Exception;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 class Strava
@@ -43,16 +46,33 @@ class Strava
 
     public function downloadActivities(string $authCode): array
     {
-        if (env("DATA_MODE") !== "hardcoded") {
-            $tokenData = $this->getAthleteWithTokens($authCode);
-            $activities = $this->getActivities($tokenData["access_token"]);
-        } else {
-            $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
-        }
-        $mappedActivities = $this->mapActivities($activities);
-        $recentActivities = $this->storeActivities($mappedActivities);
+        try {
+            if (env("DATA_MODE") !== "hardcoded") {
+                $tokenData = $this->getAthleteWithTokens($authCode);
+                $activities = $this->getActivities($tokenData["access_token"]);
+            } else {
+                $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
+            }
 
-        return $recentActivities;
+            $mappedActivities = $this->mapActivities($activities);
+            $recentActivities = $this->storeActivities($mappedActivities);
+
+            return $recentActivities;
+        } catch (Exception $error) {
+            if ($error instanceof QueryException) {
+                Log::error(
+                    'Error attempting to save Strava activities',
+                    [
+                        'message' => $error->getMessage()
+                    ]
+                );
+            }
+
+            return [
+                'success' => false,
+                'message' => $error->getMessage()
+            ];
+        }
     }
 
     private function getAthleteWithTokens(string $authCode): array
@@ -64,17 +84,51 @@ class Strava
             'code' => $authCode,
             'grant_type' => 'authorization_code'
         ];
+
         $response = Http::post($url, $config);
 
-        return json_decode($response->getBody(), true);
+        if ($response->ok()) {
+            return json_decode($response->getBody(), true);
+        }
+
+        $statusCode = $response->getStatusCode();
+        $jsonResponse = $response->json();
+        $errorMessage = $jsonResponse["message"] ?? "Strava Service not available";
+
+        Log::error(
+            'Error getting Strava athlete',
+            [
+                'status' => $statusCode,
+                'message' => $errorMessage
+            ]
+        );
+
+        throw new Exception("Strava API error: {$statusCode}: {$errorMessage}");
     }
 
     private function getActivities(string $token): array
     {
         $url = "{$this->stravaUri}/athlete/activities";
+
         $response = Http::withToken($token)->get($url);
 
-        return json_decode($response->getBody()->getContents(), true);
+        if ($response->ok()) {
+            return json_decode($response->getBody()->getContents(), true);
+        }
+
+        $statusCode = $response->getStatusCode();
+        $jsonResponse = $response->json();
+        $errorMessage = $jsonResponse["message"] ?? "Strava Service not available";
+
+        Log::error(
+            'Error getting Strava activities',
+            [
+                'status' => $statusCode,
+                'message' => $errorMessage
+            ]
+        );
+
+        throw new Exception("Strava API error: {$statusCode}: {$errorMessage}");
     }
 
     // todo: Once refactored, add code with explanation to readme file
