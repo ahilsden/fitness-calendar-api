@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\StravaActivity;
 use Exception;
 use Illuminate\Database\QueryException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
@@ -59,18 +60,23 @@ class Strava
 
             return $recentActivities;
         } catch (Exception $error) {
+            $returnErrorMessage = $error->getMessage();
+
             if ($error instanceof QueryException) {
+
                 Log::error(
-                    'Error attempting to save Strava activities',
+                    'Error saving Strava activities',
                     [
                         'message' => $error->getMessage()
                     ]
                 );
+
+                $returnErrorMessage = "SQL error: Strava activity(ies) not persisted";
             }
 
             return [
                 'success' => false,
-                'message' => $error->getMessage()
+                'message' => $returnErrorMessage
             ];
         }
     }
@@ -91,19 +97,9 @@ class Strava
             return json_decode($response->getBody(), true);
         }
 
-        $statusCode = $response->getStatusCode();
-        $jsonResponse = $response->json();
-        $errorMessage = $jsonResponse["message"] ?? "Strava Service not available";
+        $this->throwError($response);
 
-        Log::error(
-            'Error getting Strava athlete',
-            [
-                'status' => $statusCode,
-                'message' => $errorMessage
-            ]
-        );
-
-        throw new Exception("Strava API error: {$statusCode}: {$errorMessage}");
+        return [];
     }
 
     private function getActivities(string $token): array
@@ -116,19 +112,9 @@ class Strava
             return json_decode($response->getBody()->getContents(), true);
         }
 
-        $statusCode = $response->getStatusCode();
-        $jsonResponse = $response->json();
-        $errorMessage = $jsonResponse["message"] ?? "Strava Service not available";
+        $this->throwError($response);
 
-        Log::error(
-            'Error getting Strava activities',
-            [
-                'status' => $statusCode,
-                'message' => $errorMessage
-            ]
-        );
-
-        throw new Exception("Strava API error: {$statusCode}: {$errorMessage}");
+        return [];
     }
 
     // todo: Once refactored, add code with explanation to readme file
@@ -164,5 +150,22 @@ class Strava
         }
 
         return $recentActivities;
+    }
+
+    private function throwError(Response $response): void
+    {
+        $statusCode = $response->getStatusCode();
+        $jsonResponse = $response->json();
+        $errorMessage = $jsonResponse["message"] ?? "Strava Service not available";
+
+        Log::error(
+            'Error getting Strava activities',
+            [
+                'status' => $statusCode,
+                'message' => $errorMessage
+            ]
+        );
+
+        throw new Exception("Strava API error: {$statusCode}: {$errorMessage}");
     }
 }
