@@ -18,9 +18,14 @@ class StravaTest extends TestCase
             $stravaOauthUrl => Http::response(['access_token' => 'access1234'], 200),
         ]);
 
-        // todo: $fakeResponse with activities data
         Http::fake([
-            $stravaActivitiesUrl => Http::response(['data' => 'mocked data'], 200),
+            $stravaActivitiesUrl => Http::response(
+                [
+                    'activity' => ['id' => 1],
+                    'activity2' => ['id' => 2]
+                ],
+                200
+            ),
         ]);
 
         $response = $this->json('GET', route('web.strava.handleCallback'), ["code" => "exchange_code1234"]);
