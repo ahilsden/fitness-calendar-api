@@ -22,9 +22,9 @@ return new class extends Migration
             $table->integer('max_heartrate');
             $table->integer('moving_time');
             $table->integer('elapsed_time');
-            $table->text('map_polyline');
-            $table->json('start_latlng');
-            $table->json('end_latlng');
+            $table->text('map_polyline')->nullable();
+            $table->json('start_latlng')->nullable();
+            $table->json('end_latlng')->nullable();
             $table->timestamps();
         });
     }
