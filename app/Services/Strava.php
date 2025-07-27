@@ -2,15 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\StravaActivity;
 use Exception;
-use Illuminate\Database\QueryException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Schema;
 
 class Strava
 {
@@ -24,7 +21,7 @@ class Strava
     public function __construct(
         string $stravaClientId,
         string $stravaSecretId,
-        string $stravaRedirectUri
+        string $stravaRedirectUri,
     ) {
         $this->stravaClientId = $stravaClientId;
         $this->stravaSecretId = $stravaSecretId;
@@ -45,7 +42,7 @@ class Strava
         return redirect("{$this->stravaOauthUri}/authorize?{$query}");
     }
 
-    public function downloadActivities(string $authCode): array
+    public function getLatestActivities(string $authCode): array
     {
         try {
             if (env("DATA_MODE") !== "hardcoded") {
@@ -55,28 +52,11 @@ class Strava
                 $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
             }
 
-            $mappedActivities = $this->mapActivities($activities);
-            $recentActivities = $this->storeActivities($mappedActivities);
-
-            return $recentActivities;
+            return $activities;
         } catch (Exception $error) {
-            $returnErrorMessage = $error->getMessage();
-
-            if ($error instanceof QueryException) {
-
-                Log::error(
-                    'Error saving Strava activities',
-                    [
-                        'message' => $error->getMessage()
-                    ]
-                );
-
-                $returnErrorMessage = "SQL error: Strava activity(ies) not persisted";
-            }
-
             return [
                 'success' => false,
-                'message' => $returnErrorMessage
+                'message' => $error->getMessage()
             ];
         }
     }
@@ -92,7 +72,6 @@ class Strava
         ];
 
         $response = Http::post($url, $config);
-
         if ($response->ok()) {
             return json_decode($response->getBody(), true);
         }
@@ -107,7 +86,6 @@ class Strava
         $url = "{$this->stravaUri}/athlete/activities";
 
         $response = Http::withToken($token)->get($url);
-
         if ($response->ok()) {
             return json_decode($response->getBody()->getContents(), true);
         }
@@ -115,41 +93,6 @@ class Strava
         $this->throwError($response);
 
         return [];
-    }
-
-    // todo: Once refactored, add code with explanation to readme file
-    private function mapActivities(array $activities): array
-    {
-        $dataStatisticsToBeMapped = Schema::getColumnListing('strava_activities');
-
-        return array_map(function ($activity) use ($dataStatisticsToBeMapped) {
-            $activity["strava_id"] = $activity["id"];
-            $activity["map_polyline"] = $activity["map"]["summary_polyline"];
-            unset($activity["id"]);
-            unset($activity["map"]);
-
-            return array_filter($activity, function ($statItem) use ($dataStatisticsToBeMapped) {
-                return (in_array($statItem, $dataStatisticsToBeMapped));
-            }, ARRAY_FILTER_USE_KEY);
-        }, $activities);
-    }
-
-    private function storeActivities(array $mappedActivities): array
-    {
-        $recentActivities = [];
-
-        foreach ($mappedActivities as $mappedActivity) {
-            $newActivity = StravaActivity::firstOrCreate(
-                ["strava_id" => $mappedActivity["strava_id"]],
-                $mappedActivity
-            );
-
-            if ($newActivity->wasRecentlyCreated) {
-                array_push($recentActivities, $mappedActivity);
-            }
-        }
-
-        return $recentActivities;
     }
 
     private function throwError(Response $response): void
