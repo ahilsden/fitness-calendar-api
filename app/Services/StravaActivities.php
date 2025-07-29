@@ -3,15 +3,37 @@
 namespace App\Services;
 
 use App\Models\StravaActivity;
-use Exception;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class StravaActivities
 {
     // Type hint array of models?
-    public function saveActivities(array $activities)
+    public function saveActivities(array $activities): array
     {
-        dd($activities);
+        $mappedActivities = $this->mapActivities($activities);
+
+        try {
+            $recentActivities = $this->storeActivities($mappedActivities);
+        } catch (QueryException $error) {
+            $returnErrorMessage = $error->getMessage();
+
+            Log::error(
+                'Error saving Strava activities',
+                [
+                    'message' => $error->getMessage()
+                ]
+            );
+
+            $returnErrorMessage = "SQL error: Strava activity(ies) not persisted";
+
+            return [
+                'success' => false,
+                'message' => $returnErrorMessage
+            ];
+        }
+
+        return $recentActivities;
     }
 
     // todo: Once refactored, add code with explanation to readme file
