@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
