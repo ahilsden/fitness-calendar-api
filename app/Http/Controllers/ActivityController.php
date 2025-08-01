@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ActivityRequest;
 use App\Models\Activity;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class ActivityController extends Controller
 {
@@ -14,7 +14,7 @@ class ActivityController extends Controller
         return "Getting internally created activities";
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(ActivityRequest $request): JsonResponse
     {
         $activity = Activity::create($request->toArray());
 
