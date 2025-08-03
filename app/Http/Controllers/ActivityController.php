@@ -3,21 +3,31 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ActivityRequest;
-use App\Models\Activity;
+use App\Services\Activity;
 use Illuminate\Http\JsonResponse;
 
 class ActivityController extends Controller
 {
+    private $activity;
+
+    public function __construct(Activity $activity)
+    {
+        $this->activity = $activity;
+    }
+
     public function index()
     {
-        // todo
         return "Getting internally created activities";
     }
 
     public function store(ActivityRequest $request): JsonResponse
     {
-        $activity = Activity::create($request->toArray());
+        $response = $this->activity->save($request->validated());
 
-        return response()->json($activity, 201);
+        if ($response["success"] === false) {
+            return response()->json(["error" => $response["message"]], 422);
+        }
+
+        return response()->json($response['newActivities'], 201);
     }
 }

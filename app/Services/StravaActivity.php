@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\StravaActivity;
+use App\Models\StravaActivity as StravaActivityModel;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
 
-class StravaActivities
+class StravaActivity
 {
     // Type hint array of models?
     public function saveActivities(array $activities): array
@@ -33,7 +33,10 @@ class StravaActivities
             ];
         }
 
-        return $recentActivities;
+        return [
+            'success' => true,
+            'recentActivities' => $recentActivities
+        ];
     }
 
     // todo: Once refactored, add code with explanation to readme file
@@ -76,7 +79,7 @@ class StravaActivities
         $recentActivities = [];
 
         foreach ($mappedActivities as $mappedActivity) {
-            $newActivity = StravaActivity::firstOrCreate(
+            $newActivity = StravaActivityModel::firstOrCreate(
                 ["strava_id" => $mappedActivity["strava_id"]],
                 $mappedActivity
             );

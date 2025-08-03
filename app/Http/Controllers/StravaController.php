@@ -4,16 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Facades\Strava;
 use Illuminate\Http\Request;
-use App\Services\StravaActivities;
+use App\Services\StravaActivity;
 use Illuminate\Http\RedirectResponse;
 
 class StravaController extends Controller
 {
-    private $stravaActivities;
+    private $stravaActivity;
 
-    public function __construct(StravaActivities $stravaActivities)
+    public function __construct(StravaActivity $stravaActivity)
     {
-        $this->stravaActivities = $stravaActivities;
+        $this->stravaActivity = $stravaActivity;
     }
 
     public function redirectToStrava(): RedirectResponse
@@ -34,7 +34,12 @@ class StravaController extends Controller
     public function store(string $authCode)
     {
         $latestActivities = Strava::getLatestActivities($authCode);
+        $response = $this->stravaActivity->saveActivities($latestActivities);
 
-        return $this->stravaActivities->saveActivities($latestActivities);
+        if ($response["success"] === false) {
+            return response()->json(["error" => $response["message"]], 422);
+        }
+
+        return response()->json($response["recentActivities"], 201);
     }
 }
