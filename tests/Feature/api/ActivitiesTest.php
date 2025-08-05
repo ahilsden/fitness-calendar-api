@@ -24,7 +24,7 @@ class ActivitiesTest extends TestCase
         );
 
         $response->assertCreated();
-        $response->assertJson([
+        $response->assertJsonFragment([
             'user_id' => $newActivity->user_id,
             'start_date' => $newActivity->start_date,
             'type' => $newActivity->type,

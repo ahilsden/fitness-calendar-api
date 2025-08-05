@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\Log;
 
 class Activity
 {
-    public function save(array $activities)
+    public function save(array $activity)
     {
         try {
-            $newActivities = ActivityModel::create($activities);
+            $newActivity = ActivityModel::create($activity);
         } catch (QueryException $error) {
 
             $returnErrorMessage = $error->getMessage();
@@ -33,7 +33,7 @@ class Activity
 
         return [
             'success' => true,
-            'newActivities' => $newActivities
+            'newActivity' => $newActivity
         ];
     }
 }

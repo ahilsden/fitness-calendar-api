@@ -21,7 +21,7 @@ class StravaController extends Controller
         return Strava::getAuthCode();
     }
 
-    public function handleCallback(request $request)
+    public function handleCallback(Request $request)
     {
         if (!$request->has("code")) {
             // todo: redirect back to relevant SPA page

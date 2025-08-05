@@ -17,6 +17,7 @@ class ActivityController extends Controller
 
     public function index()
     {
+        // todo rather than returning all results, return
         return "Getting internally created activities";
     }
 
@@ -28,6 +29,6 @@ class ActivityController extends Controller
             return response()->json(["error" => $response["message"]], 422);
         }
 
-        return response()->json($response['newActivities'], 201);
+        return response()->json($response["newActivity"], 201);
     }
 }
