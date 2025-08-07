@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class Strava
 {
-    private $stravaOauthUri = "https://www.strava.com/oauth";
+    private $stravaOauthUri = 'https://www.strava.com/oauth';
     private $stravaUri = 'https://www.strava.com/api/v3';
 
     private $stravaClientId;
@@ -29,7 +29,7 @@ class Strava
     }
 
     public function getAuthCode(
-        string $scope = "read_all,profile:read_all,activity:read_all"
+        string $scope = 'read_all,profile:read_all,activity:read_all'
     ): RedirectResponse {
         $query = http_build_query([
             'client_id' => $this->stravaClientId,
@@ -45,9 +45,9 @@ class Strava
     public function getLatestActivities(string $authCode): array
     {
         try {
-            if (env("DATA_MODE") !== "hardcoded") {
+            if (env('DATA_MODE') !== 'hardcoded') {
                 $tokenData = $this->getAthleteWithTokens($authCode);
-                $activities = $this->getActivities($tokenData["access_token"]);
+                $activities = $this->getActivities($tokenData['access_token']);
             } else {
                 $activities = File::json(base_path('database/hardcodedData/stravaActivities.json'));
             }
@@ -99,7 +99,7 @@ class Strava
     {
         $statusCode = $response->getStatusCode();
         $jsonResponse = $response->json();
-        $errorMessage = $jsonResponse["message"] ?? "Strava Service not available";
+        $errorMessage = $jsonResponse['message'] ?? 'Strava Service not available';
 
         Log::error(
             'Error getting Strava activities',

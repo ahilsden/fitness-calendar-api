@@ -23,7 +23,7 @@ class Activity
                 ]
             );
 
-            $returnErrorMessage = "SQL error: new activity(ies) not persisted";
+            $returnErrorMessage = 'SQL error: new activity(ies) not persisted';
 
             return [
                 'success' => false,

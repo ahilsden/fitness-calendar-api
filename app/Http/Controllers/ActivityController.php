@@ -18,17 +18,17 @@ class ActivityController extends Controller
     public function index()
     {
         // todo rather than returning all results, return
-        return "Getting internally created activities";
+        return 'Getting internally created activities';
     }
 
     public function store(ActivityRequest $request): JsonResponse
     {
         $response = $this->activity->save($request->validated());
 
-        if ($response["success"] === false) {
-            return response()->json(["error" => $response["message"]], 422);
+        if ($response['success'] === false) {
+            return response()->json(['error' => $response['message']], 422);
         }
 
-        return response()->json($response["newActivity"], 201);
+        return response()->json($response['newActivity'], 201);
     }
 }

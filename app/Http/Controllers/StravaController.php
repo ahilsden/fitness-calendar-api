@@ -23,7 +23,7 @@ class StravaController extends Controller
 
     public function handleCallback(Request $request)
     {
-        if (!$request->has("code")) {
+        if (!$request->has('code')) {
             // todo: redirect back to relevant SPA page
             return redirect('/')->withErrors('Auth failed');
         }
@@ -36,10 +36,10 @@ class StravaController extends Controller
         $latestActivities = Strava::getLatestActivities($authCode);
         $response = $this->stravaActivity->saveActivities($latestActivities);
 
-        if ($response["success"] === false) {
-            return response()->json(["error" => $response["message"]], 422);
+        if ($response['success'] === false) {
+            return response()->json(['error' => $response['message']], 422);
         }
 
-        return response()->json($response["recentActivities"], 201);
+        return response()->json($response['recentActivities'], 201);
     }
 }
