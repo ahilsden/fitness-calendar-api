@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\StravaActivity as StravaActivityModel;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class StravaActivity
 {
@@ -42,25 +43,7 @@ class StravaActivity
     // todo: Once refactored, add code with explanation to readme file
     private function mapActivities(array $activities): array
     {
-        // $dataStatisticsToBeMapped = Schema::getColumnListing('strava_activities');
-
-        $dataStatisticsToBeMapped = [
-            'id',
-            'strava_id',
-            'start_date',
-            'name',
-            'type',
-            'distance',
-            'average_heartrate',
-            'max_heartrate',
-            'moving_time',
-            'elapsed_time',
-            'map_polyline',
-            'start_latlng',
-            'end_latlng',
-            'created_at',
-            'updated_at'
-        ];
+        $dataStatisticsToBeMapped = Schema::getColumnListing('strava_activities');
 
         return array_map(function ($activity) use ($dataStatisticsToBeMapped) {
             $activity['strava_id'] = $activity['id'];
