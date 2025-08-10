@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Facades\Strava;
 use Illuminate\Http\Request;
 use App\Services\StravaActivity;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 
 class StravaController extends Controller
@@ -21,7 +22,7 @@ class StravaController extends Controller
         return Strava::getAuthCode();
     }
 
-    public function handleCallback(Request $request)
+    public function handleCallback(Request $request): JsonResponse | RedirectResponse
     {
         if (!$request->has('code')) {
             // todo: redirect back to relevant SPA page
@@ -31,7 +32,7 @@ class StravaController extends Controller
         return $this->store($request->code);
     }
 
-    public function store(string $authCode)
+    public function store(string $authCode): JsonResponse
     {
         $latestActivities = Strava::getLatestActivities($authCode);
         $response = $this->stravaActivity->saveActivities($latestActivities);

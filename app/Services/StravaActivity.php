@@ -16,8 +16,12 @@ class StravaActivity
 
         try {
             $recentActivities = $this->storeActivities($mappedActivities);
+
+            return [
+                'success' => true,
+                'recentActivities' => $recentActivities
+            ];
         } catch (QueryException $error) {
-            $returnErrorMessage = $error->getMessage();
 
             Log::error(
                 'Error saving Strava activities',
@@ -26,18 +30,11 @@ class StravaActivity
                 ]
             );
 
-            $returnErrorMessage = 'SQL error: Strava activity(ies) not persisted';
-
             return [
                 'success' => false,
-                'message' => $returnErrorMessage
+                'message' =>  'SQL error: Strava activity(ies) not persisted'
             ];
         }
-
-        return [
-            'success' => true,
-            'recentActivities' => $recentActivities
-        ];
     }
 
     // todo: Once refactored, add code with explanation to readme file

@@ -14,8 +14,6 @@ class Activity
             $newActivity = ActivityModel::create($activity);
         } catch (QueryException $error) {
 
-            $returnErrorMessage = $error->getMessage();
-
             Log::error(
                 'Error saving activities',
                 [
@@ -23,11 +21,9 @@ class Activity
                 ]
             );
 
-            $returnErrorMessage = 'SQL error: new activity(ies) not persisted';
-
             return [
                 'success' => false,
-                'message' => $returnErrorMessage
+                'message' => 'SQL error: new activity(ies) not persisted'
             ];
         }
 
