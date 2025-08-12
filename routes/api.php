@@ -10,6 +10,11 @@ Route::post(
 )->name('api.login');
 
 Route::post(
+    'logout',
+    [AuthController::class, 'logout']
+)->name('api.logout');
+
+Route::post(
     '/auth/register',
     [AuthController::class, 'register']
 )->name('api.register');

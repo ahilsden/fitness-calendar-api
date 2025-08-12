@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
-use App\Models\User;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -34,5 +35,12 @@ class AuthController extends Controller
         $newUser = $this->authService->registerUser($request->validated());
 
         return response()->json(['user' => $newUser], 201);
+    }
+
+    public function logout(): Response
+    {
+        Auth::guard('web')->logout();
+
+        return response()->noContent();
     }
 }
