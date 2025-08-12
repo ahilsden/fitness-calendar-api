@@ -17,7 +17,6 @@ class ActivityController extends Controller
 
     public function index()
     {
-        // todo rather than returning all results, return
         return 'Getting internally created activities';
     }
 

@@ -5,18 +5,25 @@ namespace App\Http\Controllers;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    private $authService;
+
+    public function __construct(AuthService $authService)
+    {
+        $this->authService = $authService;
+    }
+
     public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->validated();
-        $user = User::whereEmail($request['email'])->first();
+        $authenticatedUser = $this->authService->loginUser($credentials);
 
-        if ($user && Auth::attempt($credentials)) {
-            return response()->json(['user' => $user]);
+        if ($authenticatedUser) {
+            return response()->json(['user' => $authenticatedUser]);
         }
 
         return response()->json(['error' => 'Incorrect credentials'], 401);
@@ -24,8 +31,7 @@ class AuthController extends Controller
 
     public function register(RegisterRequest $request): JsonResponse
     {
-        $request['password'] = bcrypt($request['password']);
-        $newUser = User::create($request->validated());
+        $newUser = $this->authService->registerUser($request->validated());
 
         return response()->json(['user' => $newUser], 201);
     }

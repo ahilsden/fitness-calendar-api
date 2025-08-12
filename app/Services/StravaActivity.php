@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\Schema;
 
 class StravaActivity
 {
-    // Type hint array of models?
     public function saveActivities(array $activities): array
     {
         $mappedActivities = $this->mapActivities($activities);
