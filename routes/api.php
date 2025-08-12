@@ -9,6 +9,11 @@ Route::post(
     [AuthController::class, 'login']
 )->name('api.login');
 
+Route::post(
+    '/auth/register',
+    [AuthController::class, 'register']
+)->name('api.register');
+
 Route::get(
     '/activities',
     [ActivityController::class, 'index']
