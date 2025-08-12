@@ -14,10 +14,12 @@ Route::post(
     [AuthController::class, 'register']
 )->name('api.register');
 
-Route::get(
-    '/activities',
-    [ActivityController::class, 'index']
-)->name('api.activities.index');
+Route::group(['middleware' => ['auth:sanctum']], function () {
+    Route::get(
+        'activities',
+        [ActivityController::class, 'index']
+    )->name('api.activities.index');
+});
 
 Route::post(
     '/activities/store',
